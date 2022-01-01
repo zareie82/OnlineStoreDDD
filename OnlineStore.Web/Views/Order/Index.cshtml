@@ -1,0 +1,17 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h4>Product List</h4>
+<div id="ProductList" class="h-25 pre-scrollable"></div>
+<hr />
+<div id="OrderSection">
+
+</div>
+@section Scripts{
+    <script>
+    var ProductListUrl = "@Url.ActionLink("ProductList", "Order", new { area = string.Empty })";
+
+    </script>
+}

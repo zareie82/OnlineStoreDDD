@@ -20,7 +20,7 @@ namespace OnlineStore.Web.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            return RedirectToAction("Index","Order");
         }
 
         public IActionResult Privacy()

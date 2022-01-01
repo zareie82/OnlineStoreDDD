@@ -7,11 +7,17 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using OnlineStore.Web.Data;
+using OnlineStore.Application.ProductApplication;
+using OnlineStore.Domain.Identity;
+using OnlineStore.Infrastructure.Persistance;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using AutoMapper;
+using MediatR;
+using OnlineStore.Application.ProductApplication.Commands.Create;
 
 namespace OnlineStore.Web
 {
@@ -27,13 +33,32 @@ namespace OnlineStore.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<StoreDBContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                options.EnableDetailedErrors();
+                options.EnableSensitiveDataLogging();
+            });
+
+            // Auto Mapper Configurations
+            var mapperConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new ProductMapper());
+            });
+
+            IMapper mapper = mapperConfig.CreateMapper();
+            services.AddSingleton(mapper);
+            services.AddMediatR(typeof(ProductCreateCommand).GetTypeInfo().Assembly);
+
+
+            services.AddTransient<IProductService, ProductService>();
+
+
             services.AddDatabaseDeveloperPageExceptionFilter();
 
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddDefaultIdentity<ApplicationUser>()
+                .AddDefaultUI()
+                .AddEntityFrameworkStores<StoreDBContext>();
             services.AddControllersWithViews();
         }
 
